@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { UserCard, UserCardSkeleton } from './components/UserCard';
 import { UserModal } from './components/UserModal';
+import { Navbar } from './components/ui/Navbar';
 import { useInfiniteUsers, useUser } from './hooks/useUsers';
 import { useModal } from './hooks/useModal';
 import { useInfiniteScroll } from './hooks/useInfiniteScroll';
@@ -63,24 +64,9 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">User Directory</h1>
-          <p className="text-gray-600 text-lg">
-            Discover and explore user profiles
-            {totalUsers > 0 && (
-              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {allUsers.length} of {totalUsers} users loaded
-              </span>
-            )}
-          </p>
-        </motion.div>
-
+      <Navbar userCount={allUsers.length} totalUsers={totalUsers} />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
