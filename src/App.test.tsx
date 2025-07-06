@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 
@@ -101,7 +101,7 @@ describe('App Component', () => {
   test('renders user cards when data is available', () => {
     renderWithQueryClient(<App />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getAllByText('john@example.com')).toHaveLength(2); // Appears in both locations
+    expect(screen.getByText('john@example.com')).toBeInTheDocument(); // Email appears once per card
   });
 
   test('renders loading skeletons when loading', () => {

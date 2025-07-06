@@ -13,7 +13,7 @@ interface UserModalProps {
 }
 
 export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModalProps) => {
-  const { isLoading: imageLoading, hasError, imageSrc, imageClasses, aspectRatio, dimensions } = useImageLoader(user?.profile_picture || '');
+  const { isLoading: imageLoading, hasError, imageSrc, imageClasses, aspectRatio } = useImageLoader(user?.profile_picture || '');
 
   if (!user && !isLoading) return null;
 
