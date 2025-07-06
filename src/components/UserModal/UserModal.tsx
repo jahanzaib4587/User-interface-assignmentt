@@ -17,15 +17,21 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
 
   if (!user && !isLoading) return null;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Not specified';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch {
+      return 'Invalid date';
+    }
   };
 
-  const formatPhoneNumber = (phone: string) => {
+  const formatPhoneNumber = (phone: string | null | undefined) => {
+    if (!phone) return 'No phone available';
     const cleaned = phone.replace(/\D/g, '');
     const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
     if (match) {
@@ -87,15 +93,15 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
                   ) : hasError || !imageSrc ? (
                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                       <img
-                        src={generateAvatarFallback(user.first_name || 'Unknown', user.last_name || 'User')}
-                        alt={`${user.first_name || 'Unknown'} ${user.last_name || 'User'}`}
+                        src={generateAvatarFallback(user?.first_name || 'Unknown', user?.last_name || 'User')}
+                        alt={`${user?.first_name || 'Unknown'} ${user?.last_name || 'User'}`}
                         className="w-32 h-32 rounded-full"
                       />
                     </div>
                   ) : (
                     <img
                       src={imageSrc}
-                      alt={`${user.first_name || 'Unknown'} ${user.last_name || 'User'}`}
+                      alt={`${user?.first_name || 'Unknown'} ${user?.last_name || 'User'}`}
                       className={`w-full h-full ${imageClasses}`}
                     />
                   )}
@@ -107,23 +113,23 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
             <div className="flex-1 text-center lg:text-left">
               <div className="mb-4">
                 <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                  {user.first_name || 'Unknown'} {user.last_name || 'User'}
+                  {user?.first_name || 'Unknown'} {user?.last_name || 'User'}
                 </h2>
                 <div className="flex flex-wrap justify-center lg:justify-start items-center gap-3 mb-4">
-                  <span className="text-xl text-blue-600 font-medium">{user.job || 'No job specified'}</span>
+                  <span className="text-xl text-blue-600 font-medium">{user?.job || 'No job specified'}</span>
                   <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                    user.gender === 'Male' || user.gender === 'male' 
+                    user?.gender?.toLowerCase() === 'male' 
                       ? 'bg-blue-100 text-blue-800' 
                       : 'bg-pink-100 text-pink-800'
                   }`}>
-                    {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Unknown'}
+                    {user?.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Unknown'}
                   </span>
                 </div>
                 <div className="inline-flex items-center px-3 py-2 bg-gray-50 rounded-lg">
                   <svg className="w-4 h-4 mr-2 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600 font-medium">ZIP: {user.zipcode || 'Unknown'}</span>
+                  <span className="text-gray-600 font-medium">ZIP: {user?.zipcode || 'Unknown'}</span>
                 </div>
               </div>
             </div>
@@ -143,7 +149,7 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Email</p>
-                  {user.email ? (
+                  {user?.email ? (
                     <a 
                       href={`mailto:${user.email}`}
                       className="text-blue-600 hover:text-blue-800 font-medium break-all underline-offset-2 hover:underline transition-colors duration-200"
@@ -156,7 +162,7 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Phone</p>
-                  {user.phone ? (
+                  {user?.phone ? (
                     <a 
                       href={`tel:${user.phone}`}
                       className="text-blue-600 hover:text-blue-800 font-medium underline-offset-2 hover:underline transition-colors duration-200"
@@ -181,14 +187,14 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Address</p>
-                  <p className="text-gray-900 font-medium">{user.street || 'No street address'}</p>
-                  <p className="text-gray-700">{user.city || 'Unknown'}, {user.state || 'Unknown'} {user.zipcode || 'Unknown'}</p>
-                  <p className="text-gray-700">{user.country || 'Unknown'}</p>
+                  <p className="text-gray-900 font-medium">{user?.street || 'No street address'}</p>
+                  <p className="text-gray-700">{user?.city || 'Unknown'}, {user?.state || 'Unknown'} {user?.zipcode || 'Unknown'}</p>
+                  <p className="text-gray-700">{user?.country || 'Unknown'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Coordinates</p>
                   <p className="text-gray-900 font-medium font-mono text-sm">
-                    {typeof user.latitude === 'number' && typeof user.longitude === 'number' 
+                    {typeof user?.latitude === 'number' && typeof user?.longitude === 'number' 
                       ? `${user.latitude.toFixed(6)}, ${user.longitude.toFixed(6)}`
                       : 'Coordinates not available'}
                   </p>
@@ -207,11 +213,11 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Date of Birth</p>
-                  <p className="text-gray-900 font-medium">{user.date_of_birth ? formatDate(user.date_of_birth) : 'Not specified'}</p>
+                  <p className="text-gray-900 font-medium">{formatDate(user?.date_of_birth)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">User ID</p>
-                  <p className="text-gray-900 font-medium">#{user.id ? user.id.toString().padStart(4, '0') : '0000'}</p>
+                  <p className="text-gray-900 font-medium">#{user?.id ? user.id.toString().padStart(4, '0') : '0000'}</p>
                 </div>
               </div>
             </div>
