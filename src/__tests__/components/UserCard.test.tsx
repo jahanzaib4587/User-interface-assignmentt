@@ -37,11 +37,14 @@ describe('UserCard Component', () => {
   const mockOnViewMore = jest.fn();
 
   beforeEach(() => {
-    mockUseImageLoader.mockReturnValue({
-      isLoading: false,
-      hasError: false,
-      imageSrc: 'https://example.com/john.jpg',
-    });
+      mockUseImageLoader.mockReturnValue({
+    isLoading: false,
+    hasError: false,
+    imageSrc: 'https://example.com/john.jpg',
+    imageClasses: 'aspect-square object-cover',
+    dimensions: { width: 400, height: 400 },
+    aspectRatio: 1.0,
+  });
     jest.clearAllMocks();
   });
 
@@ -68,6 +71,9 @@ describe('UserCard Component', () => {
       isLoading: true,
       hasError: false,
       imageSrc: null,
+      imageClasses: 'aspect-square object-cover',
+      dimensions: null,
+      aspectRatio: null,
     });
 
     render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
@@ -81,6 +87,9 @@ describe('UserCard Component', () => {
       isLoading: false,
       hasError: true,
       imageSrc: null,
+      imageClasses: 'aspect-square object-cover',
+      dimensions: null,
+      aspectRatio: null,
     });
 
     render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);

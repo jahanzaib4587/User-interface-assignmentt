@@ -11,7 +11,7 @@ interface UserCardProps {
 
 export const UserCard = ({ user, onViewMore }: UserCardProps) => {
   // Always call hooks first, before any conditional logic
-  const { isLoading, hasError, imageSrc } = useImageLoader(user?.profile_picture || '');
+  const { isLoading, hasError, imageSrc, imageClasses, aspectRatio } = useImageLoader(user?.profile_picture || '');
 
   // Early return if user is null/undefined (after hooks)
   if (!user) {
@@ -20,6 +20,14 @@ export const UserCard = ({ user, onViewMore }: UserCardProps) => {
 
   const handleViewMore = () => {
     onViewMore(user.id);
+  };
+
+  // Determine container height based on aspect ratio
+  const getContainerClasses = () => {
+    if (aspectRatio === null) return 'h-48'; // Default height
+    if (aspectRatio > 1.5) return 'h-36'; // Wide images get shorter container
+    if (aspectRatio < 0.7) return 'h-64'; // Tall images get taller container
+    return 'h-48'; // Square-ish images get default height
   };
 
   return (
@@ -47,11 +55,13 @@ export const UserCard = ({ user, onViewMore }: UserCardProps) => {
             />
           </div>
         ) : (
-          <img
-            src={imageSrc}
-            alt={`${user.first_name} ${user.last_name}`}
-            className="w-full h-48 object-cover"
-          />
+          <div className={`w-full ${getContainerClasses()} overflow-hidden`}>
+            <img
+              src={imageSrc}
+              alt={`${user.first_name} ${user.last_name}`}
+              className={`w-full h-full ${imageClasses}`}
+            />
+          </div>
         )}
       </div>
 

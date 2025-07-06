@@ -13,7 +13,7 @@ interface UserModalProps {
 }
 
 export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModalProps) => {
-  const { isLoading: imageLoading, hasError, imageSrc } = useImageLoader(user?.profile_picture || '');
+  const { isLoading: imageLoading, hasError, imageSrc, imageClasses, aspectRatio, dimensions } = useImageLoader(user?.profile_picture || '');
 
   if (!user && !isLoading) return null;
 
@@ -32,6 +32,22 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
       return `(${match[1]}) ${match[2]}-${match[3]}`;
     }
     return phone;
+  };
+
+  // Determine optimal image container size based on aspect ratio
+  const getImageContainerClasses = () => {
+    if (aspectRatio === null) return 'w-48 h-48'; // Default square
+    
+    if (aspectRatio > 1.5) {
+      // Wide image - use landscape orientation
+      return 'w-72 h-48';
+    } else if (aspectRatio < 0.7) {
+      // Tall image - use portrait orientation
+      return 'w-36 h-48';
+    } else {
+      // Square-ish image
+      return 'w-48 h-48';
+    }
   };
 
   return (
@@ -63,7 +79,7 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
             {/* Profile Picture */}
             <div className="flex-shrink-0 mx-auto lg:mx-0">
               <div className="relative">
-                <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-lg">
+                <div className={`${getImageContainerClasses()} rounded-2xl overflow-hidden shadow-lg`}>
                   {imageLoading ? (
                     <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
                       <Loading variant="spinner" size="md" />
@@ -80,7 +96,7 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
                     <img
                       src={imageSrc}
                       alt={`${user.first_name || 'Unknown'} ${user.last_name || 'User'}`}
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full ${imageClasses}`}
                     />
                   )}
                 </div>
