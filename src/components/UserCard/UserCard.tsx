@@ -23,14 +23,14 @@ export const UserCard = ({ user, onViewMore }: UserCardProps) => {
 
   const fullName = `${user.firstname || 'Unknown'} ${user.lastname || 'User'}`;
   const truncatedName = truncateText(fullName, 20);
-  const truncatedDescription = truncateText(user.description || 'No description available', 100);
+  const truncatedDescription = truncateText(user.description || 'No description available', 80);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-300 ease-out hover:-translate-y-1 overflow-hidden max-w-sm mx-auto"
+      className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-200 transition-all duration-300 ease-out hover:-translate-y-1 overflow-hidden max-w-sm mx-auto h-[400px] flex flex-col"
     >
       {/* Compact header with centered profile image */}
       <div className="flex flex-col items-center mb-4">
@@ -71,16 +71,18 @@ export const UserCard = ({ user, onViewMore }: UserCardProps) => {
         </div>
       </div>
 
-      {/* Compact description */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-600 leading-relaxed text-center">
-          {truncatedDescription}
-        </p>
+      {/* Standardized description section with proper text display */}
+      <div className="mb-4 flex-1 flex flex-col justify-start">
+        <div className="min-h-[48px] max-h-[72px] overflow-hidden">
+          <p className="text-sm text-gray-600 leading-relaxed text-center line-clamp-3">
+            {truncatedDescription}
+          </p>
+        </div>
       </div>
 
-      {/* Only joined date - simplified */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors duration-200">
+      {/* Fixed position joined date section */}
+      <div className="mb-4 mt-auto">
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors duration-200">
           <div className="flex items-center space-x-2">
             <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
               <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,11 +95,11 @@ export const UserCard = ({ user, onViewMore }: UserCardProps) => {
         </div>
       </div>
 
-      {/* Compact action button */}
+      {/* Fixed position action button */}
       <div>
         <Button
           onClick={handleViewMore}
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 border-0"
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 border-0"
         >
           <span className="flex items-center justify-center space-x-2">
             <span className="text-sm">View More</span>
