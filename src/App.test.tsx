@@ -5,16 +5,11 @@ import App from './App';
 
 // Mock the hooks and services
 jest.mock('./hooks/useUsers', () => ({
-  useInfiniteUsers: jest.fn(),
-  useUser: jest.fn(),
+  useUsers: jest.fn(),
 }));
 
 jest.mock('./hooks/useModal', () => ({
   useModal: jest.fn(),
-}));
-
-jest.mock('./hooks/useInfiniteScroll', () => ({
-  useInfiniteScroll: jest.fn(),
 }));
 
 const mockUsers = [
@@ -48,26 +43,17 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 };
 
 describe('App Component', () => {
-  const mockUseInfiniteUsers = require('./hooks/useUsers').useInfiniteUsers;
-  const mockUseUser = require('./hooks/useUsers').useUser;
+  const mockUseUsers = require('./hooks/useUsers').useUsers;
   const mockUseModal = require('./hooks/useModal').useModal;
-  const mockUseInfiniteScroll = require('./hooks/useInfiniteScroll').useInfiniteScroll;
 
   beforeEach(() => {
-    mockUseInfiniteUsers.mockReturnValue({
+    mockUseUsers.mockReturnValue({
       data: {
-        pages: [{ data: { users: mockUsers } }],
+        data: { users: mockUsers },
       },
       isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: true,
-      fetchNextPage: jest.fn(),
       error: null,
       refetch: jest.fn(),
-    });
-
-    mockUseUser.mockReturnValue({
-      data: null,
     });
 
     mockUseModal.mockReturnValue({
@@ -75,10 +61,6 @@ describe('App Component', () => {
       selectedUserId: null,
       openModal: jest.fn(),
       closeModal: jest.fn(),
-    });
-
-    mockUseInfiniteScroll.mockReturnValue({
-      loadMoreRef: { current: null },
     });
   });
 
@@ -94,16 +76,13 @@ describe('App Component', () => {
   test('renders user cards when data is available', () => {
     renderWithQueryClient(<App />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('john@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Developer')).toBeInTheDocument();
   });
 
   test('renders loading skeletons when loading', () => {
-    mockUseInfiniteUsers.mockReturnValue({
-      data: { pages: [] },
+    mockUseUsers.mockReturnValue({
+      data: null,
       isLoading: true,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
       error: null,
       refetch: jest.fn(),
     });
@@ -113,12 +92,9 @@ describe('App Component', () => {
   });
 
   test('renders error state when there is an error', () => {
-    mockUseInfiniteUsers.mockReturnValue({
+    mockUseUsers.mockReturnValue({
       data: null,
       isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
       error: new Error('Network error'),
       refetch: jest.fn(),
     });
@@ -134,12 +110,9 @@ describe('App Component', () => {
 
   test('handles retry on error', () => {
     const mockRefetch = jest.fn();
-    mockUseInfiniteUsers.mockReturnValue({
+    mockUseUsers.mockReturnValue({
       data: null,
       isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: jest.fn(),
       error: new Error('Network error'),
       refetch: mockRefetch,
     });
@@ -150,32 +123,5 @@ describe('App Component', () => {
     fireEvent.click(retryButton);
     
     expect(mockRefetch).toHaveBeenCalled();
-  });
-
-  test('renders Load More button when hasNextPage is true', () => {
-    renderWithQueryClient(<App />);
-    expect(screen.getByText('Load More Users')).toBeInTheDocument();
-  });
-
-  test('handles Load More button click', () => {
-    const mockFetchNextPage = jest.fn();
-    mockUseInfiniteUsers.mockReturnValue({
-      data: {
-        pages: [{ data: { users: mockUsers } }],
-      },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: true,
-      fetchNextPage: mockFetchNextPage,
-      error: null,
-      refetch: jest.fn(),
-    });
-
-    renderWithQueryClient(<App />);
-    
-    const loadMoreButton = screen.getByText('Load More Users');
-    fireEvent.click(loadMoreButton);
-    
-    expect(mockFetchNextPage).toHaveBeenCalled();
   });
 });

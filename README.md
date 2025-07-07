@@ -12,7 +12,6 @@ A modern React application built with TypeScript that displays user cards with d
 - **Responsive Design**: Fully responsive layout that works on all devices
 - **Advanced UI Components**: Custom-built components with Tailwind CSS
 - **Smooth Animations**: Framer Motion integration for delightful user interactions
-- **Infinite Scrolling**: Seamless data loading with Intersection Observer API
 - **Smart Text Truncation**: Intelligent text handling with ellipsis for consistent card layouts
 - **Efficient Data Fetching**: React Query for optimized API calls and caching
 - **Image Optimization**: Smart image loading with fallbacks and aspect ratio handling
@@ -21,7 +20,7 @@ A modern React application built with TypeScript that displays user cards with d
 - **Loading States**: Skeleton components and loading indicators
 - **Performance Optimized**: Lazy loading, memoization, and efficient rendering
 - **Code Quality**: ESLint integration with zero violations
-- **Comprehensive Testing**: 166 tests with high coverage
+- **Comprehensive Testing**: 136 tests with high coverage
 
 ## 🛠️ Tech Stack
 
@@ -45,22 +44,15 @@ src/
 │   ├── UserModal/
 │   │   ├── UserModal.tsx
 │   │   └── index.ts
-│   ├── Navbar/
-│   │   ├── Navbar.tsx
-│   │   └── index.ts
-│   ├── InfiniteScrollLoader/
-│   │   ├── InfiniteScrollLoader.tsx
-│   │   └── index.ts
 │   └── ui/
 │       ├── Button.tsx
 │       ├── Modal.tsx
-│       └── Loading.tsx
+│       ├── Loading.tsx
+│       └── Navbar.tsx
 ├── hooks/
 │   ├── useUsers.ts
-│   ├── useInfiniteUsers.ts
 │   ├── useModal.ts
-│   ├── useImageLoader.ts
-│   └── useInfiniteScroll.ts
+│   └── useImageLoader.ts
 ├── services/
 │   └── userService.ts
 ├── types/
@@ -117,31 +109,29 @@ src/
 - **Custom Hooks**: Business logic abstracted into custom hooks
 - **Service Layer**: API calls separated from UI components
 - **TypeScript-First**: Complete type safety throughout
-- **Consistent Card Dimensions**: Fixed height cards (380px) with smart text truncation
+- **Consistent Card Dimensions**: Fixed height cards (400px) with smart text truncation
 
 ### Text Truncation System
 
 - **Smart Truncation**: Intelligent text handling for consistent layouts
-- **Email Preservation**: Preserves domain when truncating email addresses
-- **Location Intelligence**: Prioritizes city names in location truncation
+- **Description Limits**: 80-character description limit with line-clamp-3
 - **Tooltip Support**: Full text available on hover
 - **Multiple Strategies**: Character-based and word-based truncation options
 
-### Infinite Scrolling
+### Data Management
 
-- **Intersection Observer**: Efficient scroll detection without performance impact
-- **Manual Fallback**: Load More button for accessibility and reliability
-- **Progress Tracking**: Real-time user counter showing loaded vs total users
-- **Smooth Loading**: Seamless data appending with loading states
-- **Performance Optimized**: Debounced loading and efficient data management
+- **Single API Call**: Simplified data fetching that loads all users at once
+- **Smart Caching**: React Query optimization for performance
+- **Real-time Updates**: Dynamic user counter updates
+- **Error Boundaries**: Comprehensive error handling throughout
 
 ### API Integration
 
-- **Endpoint**: `https://api.slingacademy.com/v1/sample-data/users`
+- **Endpoint**: `https://9e06da9a-97cf-4701-adfc-9b9a5713bbb9.mock.pstmn.io/users`
 - **Error Handling**: Comprehensive error handling with retry logic
 - **Loading States**: Skeleton components while fetching data
 - **Caching**: React Query for efficient data management
-- **Image Handling**: Graceful handling of different aspect ratios
+- **Image Handling**: Graceful handling of different aspect ratios with timeout and retry
 - **Null Safety**: Comprehensive null/undefined handling throughout
 
 ### UI/UX Features
@@ -151,72 +141,31 @@ src/
 - **Accessibility**: ARIA labels and keyboard navigation
 - **Animations**: Smooth transitions and micro-interactions
 - **Error States**: User-friendly error messages
-- **Image Optimization**: Smart aspect ratio handling and fallback avatars
+- **Image Optimization**: Smart aspect ratio handling and fallback avatars with retry mechanism
 - **Interactive Elements**: Clickable email and phone links in modals
 
 ### Performance Optimizations
 
 - **Bundle Size**: Optimized for < 500KB initial load
-- **Lazy Loading**: Images and components loaded on demand
+- **Lazy Loading**: Images loaded on demand with timeout handling
 - **Memoization**: React.memo and useMemo where appropriate
 - **Efficient Rendering**: Optimized re-renders and state management
-- **Smart Image Loading**: Dynamic container sizing based on aspect ratios
 
-## 🧪 Testing
+## 📱 Responsive Breakpoints
 
-The project includes comprehensive testing setup with **166 total tests**:
+The application adapts seamlessly across different screen sizes:
 
-- **Unit Tests**: Component rendering and behavior (23 tests for UserCard, 18 for UserModal)
-- **Integration Tests**: API integration and user interactions (8 tests for App component)
-- **Custom Hook Tests**: Isolated testing of business logic (16 tests for useUsers, 13 for useModal)
-- **Utility Tests**: Text helpers and image utilities (30 tests for textHelpers, 22 for imageHelpers)
-- **Service Tests**: API integration testing (14 tests for userService)
-- **Accessibility Tests**: ARIA labels and keyboard navigation
-
-Run tests with:
-```bash
-npm test
-```
-
-### Test Coverage
-- **High Coverage**: Comprehensive test coverage across all components
-- **Zero Lint Violations**: Clean code following React Testing Library best practices
-- **Production Ready**: All tests passing with proper assertions
-
-## 🔧 Code Quality
-
-- **ESLint Integration**: Zero violations with comprehensive rules
-- **TypeScript Strict Mode**: Complete type safety
-- **Testing Library Compliance**: Following React Testing Library best practices
-- **No Direct DOM Access**: Semantic queries for better maintainability
-- **Consistent Code Style**: Enforced through linting configuration
-
-## 🎨 Design System
-
-The application uses a consistent design system with:
-
-- **Color Palette**: Neutral grays with blue accents and professional gradients
-- **Typography**: Clear hierarchy with responsive font sizes
-- **Spacing**: Consistent spacing scale (Tailwind CSS)
-- **Components**: Reusable UI components with multiple variants
-- **Animations**: Subtle and meaningful transitions
-- **Card Layout**: Consistent 380px height with smart content fitting
-
-## 📱 Responsive Design
-
-The application is fully responsive and works across:
-
-- **Mobile**: 320px and up (optimized mobile experience)
-- **Tablet**: 768px and up (adaptive grid layouts)
-- **Desktop**: 1024px and up (multi-column grids)
-- **Large Desktop**: 1280px and up (maximum content width)
+- **Mobile**: 320px - 640px (single column)
+- **Tablet**: 641px - 768px (two columns)
+- **Desktop**: 769px - 1024px (three columns)
+- **Large Desktop**: 1025px+ (four columns)
 
 ## 🔒 Error Handling
 
 Comprehensive error handling includes:
 
 - **Network Errors**: Graceful handling of API failures with retry mechanisms
-- **Image Loading**: Fallback avatars for broken images
+- **Image Loading**: Fallback avatars for broken images with 8-second timeout and retry
 - **User Feedback**: Clear error messages and retry options
 - **Boundary Components**: React error boundaries for graceful failures
 - **Null Safety**: Comprehensive null/undefined checking throughout
@@ -229,7 +178,7 @@ This application is production-ready with:
 - **TypeScript**: Complete type safety with strict configuration
 - **Performance**: Optimized bundle and rendering (< 500KB initial load)
 - **Accessibility**: WCAG compliance with proper ARIA labels
-- **Testing**: Comprehensive test coverage (166 passing tests)
+- **Testing**: Comprehensive test coverage (136 passing tests)
 - **Documentation**: Clear code and architecture documentation
 - **Deployment**: Deployed on Vercel with CI/CD pipeline
 - **Code Quality**: Zero ESLint violations
@@ -246,15 +195,37 @@ This application is production-ready with:
 
 ### Navigation
 - **Sticky Navbar**: Professional header with gradient branding
-- **Real-time Counter**: Shows loaded vs total users
+- **Real-time Counter**: Shows total users loaded
 - **Responsive Design**: Adapts to different screen sizes
 - **Smooth Animations**: Framer Motion entrance effects
 
-### Data Management
-- **Infinite Pagination**: Efficient loading of large datasets
-- **Smart Caching**: React Query optimization for performance
-- **Real-time Updates**: Dynamic user counter updates
-- **Error Recovery**: Automatic retry mechanisms
+### Image Loading System
+- **Smart Loading**: 8-second timeout for slow-loading images
+- **Fallback System**: SVG-based fallback avatars with user initials
+- **Retry Mechanism**: Manual retry button for failed images
+- **Loading States**: Skeleton with spinning icon during load
+- **Error Handling**: Graceful degradation for broken images
+
+## 🧪 Testing Strategy
+
+The application includes comprehensive testing:
+
+- **Component Tests**: 136 passing tests covering all components
+- **Hook Tests**: Isolated testing of business logic
+- **Service Tests**: API integration and error handling tests
+- **Utility Tests**: Helper function validation
+- **Integration Tests**: End-to-end user interaction flows
+
+## 🔧 Development Workflow
+
+- **TypeScript**: Strict type checking for reliability
+- **ESLint**: Code quality enforcement with zero violations
+- **Prettier**: Consistent code formatting
+- **Husky**: Pre-commit hooks for quality assurance
+- **Jest**: Comprehensive testing framework
+- **React Testing Library**: Component testing utilities
+
+This application demonstrates modern React development practices with a focus on performance, accessibility, and maintainability.
 
 ## 📝 License
 

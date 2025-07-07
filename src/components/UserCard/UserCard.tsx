@@ -4,7 +4,6 @@ import { Button } from '../ui/Button';
 import { useImageLoader } from '../../hooks/useImageLoader';
 import { generateAvatarFallback } from '../../utils/imageHelpers';
 import { truncateText, truncateEmail } from '../../utils/textHelpers';
-import { useState } from 'react';
 
 interface UserCardProps {
   user: User;
@@ -12,8 +11,7 @@ interface UserCardProps {
 }
 
 export const UserCard = ({ user, onViewMore }: UserCardProps) => {
-  const [retryKey, setRetryKey] = useState(0);
-  const { isLoading, hasError, imageSrc } = useImageLoader(user?.avatar || '', 8000);
+  const { isLoading, hasError, imageSrc } = useImageLoader(user?.avatar || '');
 
   if (!user) {
     return null;
@@ -23,45 +21,9 @@ export const UserCard = ({ user, onViewMore }: UserCardProps) => {
     onViewMore(user.id);
   };
 
-  const handleRetryImage = () => {
-    setRetryKey(prev => prev + 1);
-  };
-
   const fullName = `${user.firstname || 'Unknown'} ${user.lastname || 'User'}`;
   const truncatedName = truncateText(fullName, 20);
   const truncatedDescription = truncateText(user.description || 'No description available', 80);
-
-  // Loading skeleton component
-  const LoadingSkeleton = () => (
-    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 rounded-full animate-pulse flex items-center justify-center">
-      <svg className="w-8 h-8 text-gray-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    </div>
-  );
-
-  // Fallback avatar component with retry option
-  const FallbackAvatar = () => (
-    <div className="w-full h-full relative group">
-      <div
-        className="w-full h-full"
-        dangerouslySetInnerHTML={{ __html: generateAvatarFallback(user.firstname || 'Unknown', user.lastname || 'User') }}
-      />
-      {hasError && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button
-            onClick={handleRetryImage}
-            className="text-white text-xs px-2 py-1 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors"
-            title="Retry loading image"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <motion.div
@@ -74,22 +36,19 @@ export const UserCard = ({ user, onViewMore }: UserCardProps) => {
       <div className="flex flex-col items-center mb-4">
         <div className="relative mb-3">
           <div className="relative w-20 h-20 rounded-full overflow-hidden ring-4 ring-gray-100 group-hover:ring-blue-200 transition-all duration-300">
-            {isLoading ? (
-              <LoadingSkeleton />
-            ) : hasError || !imageSrc ? (
-              <FallbackAvatar />
-            ) : (
+            {!hasError && imageSrc ? (
               <img
-                key={`${user.id}-${retryKey}`}
                 src={imageSrc}
                 alt={`${fullName} profile`}
                 className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 onError={() => {
-                  // This will trigger the useImageLoader to set hasError to true
+                  // Handle image error by replacing with fallback
                 }}
-                onLoad={() => {
-                  // Image loaded successfully
-                }}
+              />
+            ) : (
+              <div
+                className="w-full h-full"
+                dangerouslySetInnerHTML={{ __html: generateAvatarFallback(user.firstname || 'Unknown', user.lastname || 'User') }}
               />
             )}
           </div>
