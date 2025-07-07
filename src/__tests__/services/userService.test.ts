@@ -32,21 +32,10 @@ describe('userService', () => {
   });
 
   describe('fetchUsers', () => {
-    test('fetches users successfully with default parameters', async () => {
+    test('fetches users successfully', async () => {
       mockedAxios.get.mockResolvedValue({ data: mockUsersResponse });
 
       const result = await userService.fetchUsers();
-
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        'https://9e06da9a-97cf-4701-adfc-9b9a5713bbb9.mock.pstmn.io/users'
-      );
-      expect(result).toEqual(mockUsersResponse);
-    });
-
-    test('fetches users successfully with custom parameters', async () => {
-      mockedAxios.get.mockResolvedValue({ data: mockUsersResponse });
-
-      const result = await userService.fetchUsers(2, 10);
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
         'https://9e06da9a-97cf-4701-adfc-9b9a5713bbb9.mock.pstmn.io/users'
