@@ -134,7 +134,7 @@ describe('UserModal Component', () => {
 
   test('renders email as link when available', () => {
     render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
-
+    
     const emailLink = screen.getByRole('link', { name: 'john@example.com' });
     expect(emailLink).toBeInTheDocument();
     expect(emailLink).toHaveAttribute('href', 'mailto:john@example.com');
@@ -142,7 +142,7 @@ describe('UserModal Component', () => {
 
   test('displays username correctly', () => {
     render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
-
+    
     const usernameElements = screen.getAllByText('@johndoe');
     expect(usernameElements).toHaveLength(2);
   });

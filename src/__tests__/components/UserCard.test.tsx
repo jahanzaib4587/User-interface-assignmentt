@@ -31,11 +31,11 @@ describe('UserCard Component', () => {
 
   beforeEach(() => {
     mockOnViewMore.mockClear();
-    mockUseImageLoader.mockReturnValue({
-      isLoading: false,
-      hasError: false,
-      imageSrc: 'https://example.com/john.jpg',
-    });
+      mockUseImageLoader.mockReturnValue({
+    isLoading: false,
+    hasError: false,
+    imageSrc: 'https://example.com/john.jpg',
+  });
   });
 
   test('renders user information correctly', () => {

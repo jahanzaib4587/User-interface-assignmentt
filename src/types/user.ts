@@ -12,6 +12,6 @@ export interface User {
 
 export interface UserApiResponse {
   data: {
-    users: User[];
+  users: User[];
   };
 } 
