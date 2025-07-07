@@ -13,7 +13,7 @@ interface UserModalProps {
 }
 
 export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModalProps) => {
-  const { isLoading: imageLoading, hasError, imageSrc, imageClasses, aspectRatio } = useImageLoader(user?.profile_picture || '');
+  const { isLoading: imageLoading, hasError, imageSrc, imageClasses, aspectRatio } = useImageLoader(user?.avatar || '');
 
   if (!user && !isLoading) return null;
 
@@ -26,7 +26,7 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
         day: 'numeric',
       });
     } catch {
-      return 'Invalid date';
+      return dateString;
     }
   };
 
@@ -93,15 +93,15 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
                   ) : hasError || !imageSrc ? (
                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                       <img
-                        src={generateAvatarFallback(user?.first_name || 'Unknown', user?.last_name || 'User')}
-                        alt={`${user?.first_name || 'Unknown'} ${user?.last_name || 'User'}`}
+                        src={generateAvatarFallback(user?.firstname || 'Unknown', user?.lastname || 'User')}
+                        alt={`${user?.firstname || 'Unknown'} ${user?.lastname || 'User'}`}
                         className="w-32 h-32 rounded-full"
                       />
                     </div>
                   ) : (
                     <img
                       src={imageSrc}
-                      alt={`${user?.first_name || 'Unknown'} ${user?.last_name || 'User'}`}
+                      alt={`${user?.firstname || 'Unknown'} ${user?.lastname || 'User'}`}
                       className={`w-full h-full ${imageClasses}`}
                     />
                   )}
@@ -113,23 +113,19 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
             <div className="flex-1 text-center lg:text-left">
               <div className="mb-4">
                 <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                  {user?.first_name || 'Unknown'} {user?.last_name || 'User'}
+                  {user?.firstname || 'Unknown'} {user?.lastname || 'User'}
                 </h2>
                 <div className="flex flex-wrap justify-center lg:justify-start items-center gap-3 mb-4">
-                  <span className="text-xl text-blue-600 font-medium">{user?.job || 'No job specified'}</span>
-                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                    user?.gender?.toLowerCase() === 'male' 
-                      ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-pink-100 text-pink-800'
-                  }`}>
-                    {user?.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Unknown'}
+                  <span className="text-xl text-blue-600 font-medium">{user?.role || 'No role specified'}</span>
+                  <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                    @{user?.username || 'unknown'}
                   </span>
                 </div>
                 <div className="inline-flex items-center px-3 py-2 bg-gray-50 rounded-lg">
                   <svg className="w-4 h-4 mr-2 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600 font-medium">ZIP: {user?.zipcode || 'Unknown'}</span>
+                  <span className="text-gray-600 font-medium">Joined: {user?.join_date || 'Unknown'}</span>
                 </div>
               </div>
             </div>
@@ -161,64 +157,44 @@ export const UserModal = ({ isOpen, onClose, user, isLoading = false }: UserModa
                   )}
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Phone</p>
-                  {user?.phone ? (
-                    <a 
-                      href={`tel:${user.phone}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium underline-offset-2 hover:underline transition-colors duration-200"
-                    >
-                      {formatPhoneNumber(user.phone)}
-                    </a>
-                  ) : (
-                    <p className="text-gray-900 font-medium">No phone available</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Location Information */}
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                </svg>
-                Location Details
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Address</p>
-                  <p className="text-gray-900 font-medium">{user?.street || 'No street address'}</p>
-                  <p className="text-gray-700">{user?.city || 'Unknown'}, {user?.state || 'Unknown'} {user?.zipcode || 'Unknown'}</p>
-                  <p className="text-gray-700">{user?.country || 'Unknown'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Coordinates</p>
-                  <p className="text-gray-900 font-medium font-mono text-sm">
-                    {typeof user?.latitude === 'number' && typeof user?.longitude === 'number' 
-                      ? `${user.latitude.toFixed(6)}, ${user.longitude.toFixed(6)}`
-                      : 'Coordinates not available'}
-                  </p>
+                  <p className="text-sm text-gray-500 mb-1">Username</p>
+                  <p className="text-gray-900 font-medium">@{user?.username || 'unknown'}</p>
                 </div>
               </div>
             </div>
 
             {/* Personal Information */}
-            <div className="bg-gray-50 rounded-xl p-6 lg:col-span-2">
+            <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <svg className="w-5 h-5 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
                 Personal Details
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Date of Birth</p>
-                  <p className="text-gray-900 font-medium">{formatDate(user?.date_of_birth)}</p>
+                  <p className="text-sm text-gray-500 mb-1">Role</p>
+                  <p className="text-gray-900 font-medium">{user?.role || 'No role specified'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">User ID</p>
-                  <p className="text-gray-900 font-medium">#{user?.id ? user.id.toString().padStart(4, '0') : '0000'}</p>
+                  <p className="text-gray-900 font-medium font-mono text-sm">{user?.id || 'Unknown'}</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-gray-50 rounded-xl p-6 lg:col-span-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                </svg>
+                Description
+              </h3>
+              <div>
+                <p className="text-gray-700 leading-relaxed">
+                  {user?.description || 'No description available'}
+                </p>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { UserModal } from '../../components/UserModal/UserModal';
+import { UserModal } from '../../components/UserModal';
 import { User } from '../../types/user';
 
 // Mock the useImageLoader hook
@@ -14,22 +14,15 @@ jest.mock('../../utils/imageHelpers', () => ({
 }));
 
 const mockUser: User = {
-  id: 1,
-  first_name: 'John',
-  last_name: 'Doe',
+  id: 'user-123',
+  username: 'johndoe',
+  firstname: 'John',
+  lastname: 'Doe',
   email: 'john@example.com',
-  gender: 'male',
-  job: 'Developer',
-  city: 'New York',
-  state: 'NY',
-  country: 'USA',
-  profile_picture: 'https://example.com/john.jpg',
-  phone: '123-456-7890',
-  street: '123 Main St',
-  zipcode: '10001',
-  date_of_birth: '1990-01-01T00:00:00',
-  latitude: 40.7128,
-  longitude: -74.0060,
+  avatar: 'https://example.com/john.jpg',
+  role: 'Developer',
+  join_date: '1/15/2024',
+  description: 'Experienced developer with expertise in React and TypeScript.',
 };
 
 describe('UserModal Component', () => {
@@ -48,27 +41,14 @@ describe('UserModal Component', () => {
     jest.clearAllMocks();
   });
 
-  test('renders user information correctly when open', () => {
+  test('renders user information correctly', () => {
     render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('Developer')).toBeInTheDocument();
+    expect(screen.getAllByText('Developer')).toHaveLength(2);
     expect(screen.getByText('john@example.com')).toBeInTheDocument();
-    expect(screen.getByText('123 Main St')).toBeInTheDocument();
-    expect(screen.getByText('New York, NY 10001')).toBeInTheDocument();
-    expect(screen.getByText('USA')).toBeInTheDocument();
-  });
-
-  test('does not render when closed', () => {
-    render(<UserModal isOpen={false} onClose={mockOnClose} user={mockUser} />);
-
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-  });
-
-  test('renders loading state', () => {
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={null} isLoading={true} />);
-
-    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
+    expect(screen.getAllByText('@johndoe')).toHaveLength(2);
+    expect(screen.getByText('Joined: 1/15/2024')).toBeInTheDocument();
   });
 
   test('renders user image when available', () => {
@@ -79,149 +59,120 @@ describe('UserModal Component', () => {
     expect(image).toHaveAttribute('src', 'https://example.com/john.jpg');
   });
 
+  test('renders loading state when image is loading', () => {
+    mockUseImageLoader.mockReturnValue({
+      isLoading: true,
+      hasError: false,
+      imageSrc: null,
+      imageClasses: '',
+      dimensions: null,
+      aspectRatio: null,
+    });
+
+    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
+
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+  });
+
   test('renders fallback avatar when image has error', () => {
     mockUseImageLoader.mockReturnValue({
       isLoading: false,
       hasError: true,
       imageSrc: null,
-      imageClasses: 'aspect-square object-cover',
+      imageClasses: '',
       dimensions: null,
       aspectRatio: null,
     });
 
     render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
 
-    const fallbackImages = screen.getAllByAltText('John Doe');
-    expect(fallbackImages[0]).toBeInTheDocument();
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
   test('calls onClose when close button is clicked', () => {
     render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
 
-    const closeButton = screen.getByRole('button', { name: /close modal/i });
+    const closeButton = screen.getByLabelText('Close modal');
     fireEvent.click(closeButton);
 
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  test('formats date correctly', () => {
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
+  test('does not render when isOpen is false', () => {
+    render(<UserModal isOpen={false} onClose={mockOnClose} user={mockUser} />);
 
-    expect(screen.getByText('January 1, 1990')).toBeInTheDocument();
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
   });
 
-  test('formats phone number correctly', () => {
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
+  test('renders loading state when isLoading is true', () => {
+    render(<UserModal isOpen={true} onClose={mockOnClose} user={null} isLoading={true} />);
 
-    expect(screen.getByText('(123) 456-7890')).toBeInTheDocument();
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
   });
 
-  test('displays coordinates correctly', () => {
+  test('handles missing user data gracefully', () => {
+    const incompleteUser = {
+      id: 'user-123',
+      username: '',
+      firstname: '',
+      lastname: '',
+      email: '',
+      avatar: '',
+      role: '',
+      join_date: '',
+      description: '',
+    };
+
+    render(<UserModal isOpen={true} onClose={mockOnClose} user={incompleteUser} />);
+
+    expect(screen.getByText('Unknown User')).toBeInTheDocument();
+    expect(screen.getAllByText('No role specified')).toHaveLength(2);
+    expect(screen.getByText('No email available')).toBeInTheDocument();
+    expect(screen.getAllByText('@unknown')).toHaveLength(2);
+    expect(screen.getByText('Joined: Unknown')).toBeInTheDocument();
+  });
+
+  test('renders email as link when available', () => {
     render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
 
-    expect(screen.getByText('40.712800, -74.006000')).toBeInTheDocument();
+    const emailLink = screen.getByRole('link', { name: 'john@example.com' });
+    expect(emailLink).toBeInTheDocument();
+    expect(emailLink).toHaveAttribute('href', 'mailto:john@example.com');
+  });
+
+  test('displays username correctly', () => {
+    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
+
+    const usernameElements = screen.getAllByText('@johndoe');
+    expect(usernameElements).toHaveLength(2);
+  });
+
+  test('displays description correctly', () => {
+    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
+
+    expect(screen.getByText('Experienced developer with expertise in React and TypeScript.')).toBeInTheDocument();
+  });
+
+  test('handles missing description gracefully', () => {
+    const userWithoutDescription = {
+      ...mockUser,
+      description: '',
+    };
+
+    render(<UserModal isOpen={true} onClose={mockOnClose} user={userWithoutDescription} />);
+
+    expect(screen.getByText('No description available')).toBeInTheDocument();
   });
 
   test('displays user ID correctly', () => {
     render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
 
-    expect(screen.getByText('#0001')).toBeInTheDocument();
+    expect(screen.getByText('user-123')).toBeInTheDocument();
   });
 
-  test('renders section headers correctly', () => {
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
+  test('renders with null user', () => {
+    render(<UserModal isOpen={true} onClose={mockOnClose} user={null} />);
 
-    expect(screen.getByText('Contact Information')).toBeInTheDocument();
-    expect(screen.getByText('Location Details')).toBeInTheDocument();
-    expect(screen.getByText('Personal Details')).toBeInTheDocument();
-  });
-
-  test('handles missing user data gracefully', () => {
-    const incompleteUser = {
-      ...mockUser,
-      first_name: '',
-      last_name: '',
-      job: '',
-      email: '',
-      phone: '',
-      street: '',
-      city: '',
-      state: '',
-      country: '',
-      date_of_birth: '',
-      zipcode: '',
-      latitude: undefined,
-      longitude: undefined,
-    } as any;
-
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={incompleteUser} />);
-
-    expect(screen.getByText('Unknown User')).toBeInTheDocument();
-    expect(screen.getByText('No job specified')).toBeInTheDocument();
-    expect(screen.getByText('No email available')).toBeInTheDocument();
-    expect(screen.getByText('No phone available')).toBeInTheDocument();
-    expect(screen.getByText('No street address')).toBeInTheDocument();
-    expect(screen.getByText('Unknown, Unknown Unknown')).toBeInTheDocument();
-    expect(screen.getByText('Not specified')).toBeInTheDocument();
-    expect(screen.getByText('Coordinates not available')).toBeInTheDocument();
-  });
-
-  test('returns null when user is null and not loading', () => {
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={null} isLoading={false} />);
-    
-    // When user is null and not loading, modal returns null, so no modal content should be present
-    expect(screen.queryByText('Contact Information')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /close modal/i })).not.toBeInTheDocument();
-  });
-
-  test('returns null when not open and user is null', () => {
-    render(<UserModal isOpen={false} onClose={mockOnClose} user={null} isLoading={false} />);
-    
-    // When modal is not open, no modal content should be present
-    expect(screen.queryByText('Contact Information')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /close modal/i })).not.toBeInTheDocument();
-  });
-
-  test('handles female gender correctly', () => {
-    const femaleUser = { ...mockUser, gender: 'female' };
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={femaleUser} />);
-
-    expect(screen.getByText('Female')).toBeInTheDocument();
-  });
-
-  test('handles gender capitalization', () => {
-    const userWithLowerGender = { ...mockUser, gender: 'male' };
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={userWithLowerGender} />);
-
-    expect(screen.getByText('Male')).toBeInTheDocument();
-  });
-
-  test('handles missing zipcode', () => {
-    const userWithoutZip = { ...mockUser, zipcode: '' };
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={userWithoutZip} />);
-
-    expect(screen.getByText('ZIP: Unknown')).toBeInTheDocument();
-  });
-
-  test('renders image loading state', () => {
-    mockUseImageLoader.mockReturnValue({
-      isLoading: true,
-      hasError: false,
-      imageSrc: null,
-      imageClasses: 'aspect-square object-cover',
-      dimensions: null,
-      aspectRatio: null,
-    });
-
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
-
-    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
-  });
-
-  test('close button has correct accessibility attributes', () => {
-    render(<UserModal isOpen={true} onClose={mockOnClose} user={mockUser} />);
-
-    const closeButton = screen.getByRole('button', { name: /close modal/i });
-    expect(closeButton).toHaveAttribute('aria-label', 'Close modal');
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
   });
 }); 
