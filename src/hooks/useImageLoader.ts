@@ -10,7 +10,7 @@ interface UseImageLoaderReturn {
   aspectRatio: number | null;
 }
 
-export const useImageLoader = (src: string): UseImageLoaderReturn => {
+export const useImageLoader = (src: string, timeout: number = 10000): UseImageLoaderReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -33,9 +33,15 @@ export const useImageLoader = (src: string): UseImageLoaderReturn => {
     setHasError(false);
 
     const img = new Image();
+    let timeoutId: NodeJS.Timeout;
     
     const handleLoad = async () => {
       try {
+        // Clear timeout since image loaded successfully
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
         // Get image dimensions
         const imageDimensions = await getImageDimensions(src);
         const ratio = getAspectRatio(imageDimensions.width, imageDimensions.height);
@@ -57,6 +63,9 @@ export const useImageLoader = (src: string): UseImageLoaderReturn => {
     };
 
     const handleError = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       setHasError(true);
       setIsLoading(false);
       setImageSrc(null);
@@ -65,15 +74,34 @@ export const useImageLoader = (src: string): UseImageLoaderReturn => {
       setAspectRatio(null);
     };
 
+    const handleTimeout = () => {
+      console.warn(`Image loading timeout after ${timeout}ms for: ${src}`);
+      setHasError(true);
+      setIsLoading(false);
+      setImageSrc(null);
+      setImageClasses('aspect-square object-cover');
+      setDimensions(null);
+      setAspectRatio(null);
+    };
+
+    // Set up timeout
+    timeoutId = setTimeout(handleTimeout, timeout);
+
     img.onload = handleLoad;
     img.onerror = handleError;
+    
+    // Add crossOrigin attribute to handle CORS issues
+    img.crossOrigin = 'anonymous';
     img.src = src;
 
     return () => {
       img.onload = null;
       img.onerror = null;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
-  }, [src]);
+  }, [src, timeout]);
 
   return {
     isLoading,
