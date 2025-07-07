@@ -234,3 +234,5 @@ This project is created for a coding challenge and is not intended for commercia
 ---
 
 **🔗 [Live Demo](https://user-interface-assignmentt.vercel.app/)** | Built with ❤️ using React, TypeScript, and modern web technologies
+![image](https://github.com/user-attachments/assets/da8ea624-9665-427a-93c3-b5d18afbed42)
+
