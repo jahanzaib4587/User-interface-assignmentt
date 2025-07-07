@@ -2,9 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 
 export const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const openModal = useCallback((userId: number) => {
+  const openModal = useCallback((userId: string) => {
     setSelectedUserId(userId);
     setIsOpen(true);
     document.body.style.overflow = 'hidden';

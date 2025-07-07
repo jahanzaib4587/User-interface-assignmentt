@@ -1,10 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { UserCard, UserCardSkeleton } from './components/UserCard';
 import { UserModal } from './components/UserModal';
 import { Navbar } from './components/ui/Navbar';
-import { useInfiniteUsers, useUser } from './hooks/useUsers';
+import { useInfiniteUsers } from './hooks/useUsers';
 import { useModal } from './hooks/useModal';
 import { useInfiniteScroll } from './hooks/useInfiniteScroll';
 import { Button } from './components/ui/Button';
@@ -33,9 +33,8 @@ function AppContent() {
   } = useInfiniteUsers(20);
   
   const { isOpen, selectedUserId, openModal, closeModal } = useModal();
-  const { data: selectedUserData } = useUser(selectedUserId || 0);
 
-  const handleViewMore = (userId: number) => {
+  const handleViewMore = (userId: string) => {
     openModal(userId);
   };
 
@@ -55,12 +54,16 @@ function AppContent() {
     isFetchingNextPage
   );
 
-  const allUsers = data?.pages.flatMap(page => page.users || []) ?? [];
+  const allUsers = data?.pages.flatMap(page => page.data?.users || []) ?? [];
   
-  // Calculate total users with fallback logic
-  const totalUsers = data?.pages[0]?.pagination?.total ?? 
-                     data?.pages[0]?.total_users ?? 
-                     0;
+  // Find the selected user from the already loaded users
+  const selectedUser = useMemo(() => {
+    if (!selectedUserId) return null;
+    return allUsers.find(user => user.id === selectedUserId) || null;
+  }, [allUsers, selectedUserId]);
+  
+  // Calculate total users based on the current data available
+  const totalUsers = allUsers.length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -141,8 +144,8 @@ function AppContent() {
         <UserModal
           isOpen={isOpen}
           onClose={closeModal}
-          user={selectedUserData?.user || null}
-          isLoading={selectedUserId !== null && !selectedUserData}
+          user={selectedUser}
+          isLoading={false}
         />
       </div>
     </div>

@@ -19,22 +19,15 @@ jest.mock('./hooks/useInfiniteScroll', () => ({
 
 const mockUsers = [
   {
-    id: 1,
-    first_name: 'John',
-    last_name: 'Doe',
+    id: 'user-123',
+    username: 'johndoe',
+    firstname: 'John',
+    lastname: 'Doe',
     email: 'john@example.com',
-    gender: 'male',
-    job: 'Developer',
-    city: 'New York',
-    state: 'NY',
-    country: 'USA',
-    profile_picture: 'https://example.com/john.jpg',
-    phone: '123-456-7890',
-    street: '123 Main St',
-    zipcode: '10001',
-    date_of_birth: '1990-01-01',
-    latitude: 40.7128,
-    longitude: -74.0060,
+    avatar: 'https://example.com/john.jpg',
+    role: 'Developer',
+    join_date: '1/15/2024',
+    description: 'Experienced developer with expertise in React and TypeScript.',
   },
 ];
 
@@ -63,7 +56,7 @@ describe('App Component', () => {
   beforeEach(() => {
     mockUseInfiniteUsers.mockReturnValue({
       data: {
-        pages: [{ users: mockUsers, pagination: { total: 100 } }],
+        pages: [{ data: { users: mockUsers } }],
       },
       isLoading: false,
       isFetchingNextPage: false,
@@ -101,7 +94,7 @@ describe('App Component', () => {
   test('renders user cards when data is available', () => {
     renderWithQueryClient(<App />);
     expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('john@example.com')).toBeInTheDocument(); // Email appears once per card
+    expect(screen.getByText('john@example.com')).toBeInTheDocument();
   });
 
   test('renders loading skeletons when loading', () => {
@@ -136,7 +129,7 @@ describe('App Component', () => {
 
   test('shows user counter when users are loaded', () => {
     renderWithQueryClient(<App />);
-    expect(screen.getByText('1 of 100 users loaded')).toBeInTheDocument();
+    expect(screen.getByText('1 of 1 users loaded')).toBeInTheDocument();
   });
 
   test('handles retry on error', () => {
@@ -168,7 +161,7 @@ describe('App Component', () => {
     const mockFetchNextPage = jest.fn();
     mockUseInfiniteUsers.mockReturnValue({
       data: {
-        pages: [{ users: mockUsers, pagination: { total: 100 } }],
+        pages: [{ data: { users: mockUsers } }],
       },
       isLoading: false,
       isFetchingNextPage: false,

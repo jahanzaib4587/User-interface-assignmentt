@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { UserCard } from '../../components/UserCard/UserCard';
+import { UserCard } from '../../components/UserCard';
 import { User } from '../../types/user';
 
 // Mock the useImageLoader hook
@@ -14,38 +14,28 @@ jest.mock('../../utils/imageHelpers', () => ({
 }));
 
 const mockUser: User = {
-  id: 1,
-  first_name: 'John',
-  last_name: 'Doe',
+  id: 'user-123',
+  username: 'johndoe',
+  firstname: 'John',
+  lastname: 'Doe',
   email: 'john@example.com',
-  gender: 'male',
-  job: 'Developer',
-  city: 'New York',
-  state: 'NY',
-  country: 'USA',
-  profile_picture: 'https://example.com/john.jpg',
-  phone: '123-456-7890',
-  street: '123 Main St',
-  zipcode: '10001',
-  date_of_birth: '1990-01-01',
-  latitude: 40.7128,
-  longitude: -74.0060,
+  avatar: 'https://example.com/john.jpg',
+  role: 'Developer',
+  join_date: '1/15/2024',
+  description: 'Experienced developer with expertise in React and TypeScript.',
 };
 
 describe('UserCard Component', () => {
-  const mockUseImageLoader = require('../../hooks/useImageLoader').useImageLoader;
   const mockOnViewMore = jest.fn();
+  const mockUseImageLoader = require('../../hooks/useImageLoader').useImageLoader;
 
   beforeEach(() => {
-      mockUseImageLoader.mockReturnValue({
-    isLoading: false,
-    hasError: false,
-    imageSrc: 'https://example.com/john.jpg',
-    imageClasses: 'aspect-square object-cover',
-    dimensions: { width: 400, height: 400 },
-    aspectRatio: 1.0,
-  });
-    jest.clearAllMocks();
+    mockOnViewMore.mockClear();
+    mockUseImageLoader.mockReturnValue({
+      isLoading: false,
+      hasError: false,
+      imageSrc: 'https://example.com/john.jpg',
+    });
   });
 
   test('renders user information correctly', () => {
@@ -53,132 +43,103 @@ describe('UserCard Component', () => {
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Developer')).toBeInTheDocument();
-    expect(screen.getByText('john@example.com')).toBeInTheDocument(); // Email appears once
-    expect(screen.getByText('New York, NY, USA')).toBeInTheDocument();
-    expect(screen.getByText('Male')).toBeInTheDocument();
-  });
-
-  test('renders user image when available', () => {
-    render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
-
-    const image = screen.getByAltText('John Doe');
-    expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', 'https://example.com/john.jpg');
-  });
-
-  test('renders loading state when image is loading', () => {
-    mockUseImageLoader.mockReturnValue({
-      isLoading: true,
-      hasError: false,
-      imageSrc: null,
-      imageClasses: 'aspect-square object-cover',
-      dimensions: null,
-      aspectRatio: null,
-    });
-
-    render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
-
-    // Check for the presence of loading content by looking for the user name
-    // which should still be rendered during loading
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-  });
-
-  test('renders fallback avatar when image has error', () => {
-    mockUseImageLoader.mockReturnValue({
-      isLoading: false,
-      hasError: true,
-      imageSrc: null,
-      imageClasses: 'aspect-square object-cover',
-      dimensions: null,
-      aspectRatio: null,
-    });
-
-    render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
-
-    const fallbackImage = screen.getByAltText('John Doe');
-    expect(fallbackImage).toBeInTheDocument();
-    // Check that the generateAvatarFallback function was called
-    expect(require('../../utils/imageHelpers').generateAvatarFallback).toHaveBeenCalledWith('John', 'Doe');
+    expect(screen.getByText('1/15/2024')).toBeInTheDocument();
+    expect(screen.getByText('Experienced developer with expertise in React and TypeScript.')).toBeInTheDocument();
   });
 
   test('calls onViewMore when View More button is clicked', () => {
     render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
 
-    const viewMoreButton = screen.getByText('View More');
-    fireEvent.click(viewMoreButton);
+    const viewButton = screen.getByText('View More');
+    fireEvent.click(viewButton);
 
-    expect(mockOnViewMore).toHaveBeenCalledWith(1);
+    expect(mockOnViewMore).toHaveBeenCalledWith('user-123');
   });
 
-  test('renders female gender badge correctly', () => {
-    const femaleUser = { ...mockUser, gender: 'female' };
-    render(<UserCard user={femaleUser} onViewMore={mockOnViewMore} />);
+  test('displays profile image when available', () => {
+    render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
 
-    expect(screen.getByText('Female')).toBeInTheDocument();
+    const profileImage = screen.getByAltText('John Doe profile');
+    expect(profileImage).toBeInTheDocument();
+    expect(profileImage).toHaveAttribute('src', 'https://example.com/john.jpg');
+  });
+
+  test('handles image loading error', () => {
+    mockUseImageLoader.mockReturnValue({
+      isLoading: false,
+      hasError: true,
+      imageSrc: null,
+    });
+
+    render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
+
+    // Check that the fallback avatar is used
+    expect(require('../../utils/imageHelpers').generateAvatarFallback).toHaveBeenCalledWith('John', 'Doe');
   });
 
   test('handles missing user data gracefully', () => {
-    const incompleteUser = {
+    const userWithMissingData = {
       ...mockUser,
-      first_name: '',
-      last_name: '',
-      job: '',
-      email: '',
-      city: '',
-      state: '',
-      country: '',
-      gender: '',
+      firstname: '',
+      lastname: '',
+      role: '',
+      join_date: '',
+      description: '',
     };
 
-    render(<UserCard user={incompleteUser} onViewMore={mockOnViewMore} />);
+    render(<UserCard user={userWithMissingData} onViewMore={mockOnViewMore} />);
 
     expect(screen.getByText('Unknown User')).toBeInTheDocument();
-    expect(screen.getByText('No job specified')).toBeInTheDocument();
-    expect(screen.getByText('No email available')).toBeInTheDocument();
-    expect(screen.getByText('Unknown, Unknown, Unknown')).toBeInTheDocument();
+    expect(screen.getByText('Member')).toBeInTheDocument();
+    expect(screen.getByText('No description available')).toBeInTheDocument();
     expect(screen.getByText('Unknown')).toBeInTheDocument();
   });
 
-  test('returns null for null user', () => {
-    render(<UserCard user={null as any} onViewMore={mockOnViewMore} />);
-    
-    // When user is null, the component returns null, so no user elements should be present
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-    expect(screen.queryByText('View More')).not.toBeInTheDocument();
-  });
-
-  test('handles undefined user properties', () => {
-    const userWithUndefined = {
+  test('truncates long names correctly', () => {
+    const userWithLongName = {
       ...mockUser,
-      first_name: undefined,
-      last_name: undefined,
-    } as any;
+      firstname: 'VeryLongFirstNameThatShouldBeTruncated',
+      lastname: 'VeryLongLastNameThatShouldBeTruncated',
+    };
 
-    render(<UserCard user={userWithUndefined} onViewMore={mockOnViewMore} />);
+    render(<UserCard user={userWithLongName} onViewMore={mockOnViewMore} />);
 
-    expect(screen.getByText('Unknown User')).toBeInTheDocument();
+    expect(screen.getByText('VeryLongFirstNameTha...')).toBeInTheDocument();
   });
 
-  test('renders with correct CSS classes', () => {
+  test('truncates long descriptions correctly', () => {
+    const userWithLongDescription = {
+      ...mockUser,
+      description: 'This is a very long description that should be truncated because it exceeds the maximum length that we have set for the description field in the user card component.',
+    };
+
+    render(<UserCard user={userWithLongDescription} onViewMore={mockOnViewMore} />);
+
+    // Check that some part of the description is visible (truncated)
+    expect(screen.getByText(/This is a very long description that should be truncated/)).toBeInTheDocument();
+  });
+
+  test('displays join date correctly', () => {
     render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
 
-    // Check that the component renders without errors by verifying key elements are present
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('View More')).toBeInTheDocument();
+    expect(screen.getByText('1/15/2024')).toBeInTheDocument();
   });
 
-  test('gender badge has correct styling for male', () => {
+  test('handles missing join date', () => {
+    const userWithoutJoinDate = {
+      ...mockUser,
+      join_date: '',
+    };
+
+    render(<UserCard user={userWithoutJoinDate} onViewMore={mockOnViewMore} />);
+
+    expect(screen.queryByText('1/15/2024')).not.toBeInTheDocument();
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
+  });
+
+  test('displays joined label correctly', () => {
     render(<UserCard user={mockUser} onViewMore={mockOnViewMore} />);
 
-    const genderBadge = screen.getByText('Male');
-    expect(genderBadge).toHaveClass('bg-blue-100', 'text-blue-800');
-  });
-
-  test('gender badge has correct styling for female', () => {
-    const femaleUser = { ...mockUser, gender: 'female' };
-    render(<UserCard user={femaleUser} onViewMore={mockOnViewMore} />);
-
-    const genderBadge = screen.getByText('Female');
-    expect(genderBadge).toHaveClass('bg-pink-100', 'text-pink-800');
+    expect(screen.getByText('Joined')).toBeInTheDocument();
   });
 }); 
